@@ -43,6 +43,7 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.signature.SignatureWriter;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.security.PrivilegedAction;
@@ -452,6 +453,9 @@ public interface MethodDescription extends TypeVariableSource,
      */
     abstract class AbstractBase extends TypeVariableSource.AbstractBase implements MethodDescription {
 
+        @Nullable
+        private Integer stackSize = null;
+
         /**
          * A merger of all method modifiers that are visible in the Java source code.
          */
@@ -468,7 +472,14 @@ public interface MethodDescription extends TypeVariableSource,
          * {@inheritDoc}
          */
         public int getStackSize() {
-            return getParameters().asTypeList().getStackSize() + (isStatic() ? 0 : 1);
+            Integer stackSizeLocal = this.stackSize;
+            if (stackSizeLocal != null) {
+                return stackSizeLocal;
+            } else {
+                stackSizeLocal = (getParameters().asTypeList().getStackSize() + (isStatic() ? 0 : 1));
+                stackSize = stackSizeLocal;
+                return stackSizeLocal;
+            }
         }
 
         /**
